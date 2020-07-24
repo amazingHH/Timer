@@ -1,2 +1,2 @@
 # Timer
-A timer for seconds level
+A generic timer for second level
