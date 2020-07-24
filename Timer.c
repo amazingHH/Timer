@@ -1,14 +1,39 @@
+/***************************************************************
+ * Timer.c
+ *
+ * Copyright (C) 2020 Francois Alex Hao <297008410@qq.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 or version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+***************************************************************/
+
 #include "Timer.h"
 
 
 static int g_Timer_Cnt = 0;
 static int g_Timer_Index = 0;
+#ifdef __WIN32__
 HANDLE Timer_Mutex;
+#endif
 
 static Internal_Timer Timer_CFG_Table[TIMER_NUMBER] = {};
+#ifdef __WIN32__
 DWORD WINAPI Main_Timer_Start(void);
-// static void Timer_Callback();
+#endif
 
+/***************************************************************
+Function Name:           Mutex_Init
+Function Description:    Initial the Timer Mutex
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
 static bool Mutex_Init(void)
 {
     bool ret = true;
@@ -23,6 +48,12 @@ static bool Mutex_Init(void)
     return ret;
 }
 
+/***************************************************************
+Function Name:           Mutex_lock
+Function Description:    Wrapper function for lock the mutex
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
 static bool Mutex_lock(void)
 {
     bool ret = true;
@@ -41,6 +72,13 @@ static bool Mutex_lock(void)
     return ret;
 }
 
+/***************************************************************
+Function Name:           Mutex_unlock
+Function Description:    Wrapper function for unlock the mutex
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
+
 static bool Mutex_unlock(void)
 {
     bool ret = true;
@@ -53,6 +91,12 @@ static bool Mutex_unlock(void)
     return ret;
 }
 
+/***************************************************************
+Function Name:           Array_Init
+Function Description:    Initial the global timer table
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
 static void Array_Init(void)
 {
     int i = 0;
@@ -77,6 +121,12 @@ static void Array_Init(void)
     }
 }
 
+/***************************************************************
+Function Name:           Timer_Register
+Function Description:    Register the timer you want
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
 Timer_Rregister_Status Timer_Register(G_Timer *T)
 {
     Timer_Rregister_Status ret = Register_fail;
@@ -102,7 +152,12 @@ Timer_Rregister_Status Timer_Register(G_Timer *T)
     }
     return ret;
 }
-
+/***************************************************************
+Function Name:           Timer_Start
+Function Description:    Start the timer you want
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
 bool Timer_Start(G_Timer T)
 {
     uint_8 i = 0;
@@ -129,6 +184,12 @@ bool Timer_Start(G_Timer T)
     return ret;
 }
 
+/***************************************************************
+Function Name:           Timer_Checker
+Function Description:    Check the timer you want
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
 Timer_Runing_Status Timer_Checker(G_Timer T)
 {
     uint_8 i = 0;
@@ -143,6 +204,12 @@ Timer_Runing_Status Timer_Checker(G_Timer T)
     return ret;
 }
 
+/***************************************************************
+Function Name:           Main_Timer_Init
+Function Description:    Main timer initial
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
 bool Main_Timer_Init()
 {
 #ifdef __linux__
@@ -175,6 +242,12 @@ bool Main_Timer_Init()
 #endif // __WIN32__
 }
 
+/***************************************************************
+Function Name:           Main_Timer_Start
+Function Description:    Main loop for the timer
+Author:                  Francois Alex Hao
+Date:                    2020/7/24
+***************************************************************/
 DWORD WINAPI Main_Timer_Start(void)
 {
     while(1)
