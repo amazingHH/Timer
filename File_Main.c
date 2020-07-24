@@ -2,14 +2,9 @@
 #include <stdlib.h>
 #include "Timer_config.h"
 
-DWORD dwLast;
-DWORD dwCurrent;
-
 void test(void)
 {
     printf("10s timeout \n");
-    dwCurrent = GetTickCount();
-    printf("cost %d \n", (dwCurrent-dwLast));
 }
 
 void test1(void)
@@ -32,7 +27,6 @@ void main(void)
     Timer_Register(&timer_S);
     Timer_Start(timer);
     Timer_Start(timer_S);
-    dwLast = GetTickCount();
 
     while (1)
     {

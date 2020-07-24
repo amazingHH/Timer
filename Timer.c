@@ -12,18 +12,21 @@ DWORD WINAPI Main_Timer_Start(void);
 static bool Mutex_Init(void)
 {
     bool ret = true;
+#ifdef __WIN32__
     Timer_Mutex = CreateMutex(NULL,false,NULL);
     if (Timer_Mutex == NULL)
     {
         printf("Timer Mutex create failure \n");
         ret = false;
     }
+#endif
     return ret;
 }
 
 static bool Mutex_lock(void)
 {
     bool ret = true;
+#ifdef __WIN32__
     DWORD temp = WaitForSingleObject(Timer_Mutex, INFINITE);
     // printf("temp = %d \n",temp);
     if (temp == WAIT_OBJECT_0)
@@ -34,16 +37,19 @@ static bool Mutex_lock(void)
         ret = false;
     else
         ret = false;
+#endif
     return ret;
 }
 
 static bool Mutex_unlock(void)
 {
     bool ret = true;
+#ifdef __WIN32__
     int ret_value;
     ret_value = ReleaseMutex(Timer_Mutex);
     if (ret_value == 0)
         ret = false;
+#endif
     return ret;
 }
 
@@ -150,7 +156,7 @@ bool Main_Timer_Init()
     }
     Array_Init();
 #endif // __linux__
-//#ifdef __WIN32__
+#ifdef __WIN32__
     bool ret = true;
     HANDLE Timer_Thread_Handle;
     // Sys_Err_Type ret = NO_ERR;
@@ -166,7 +172,7 @@ bool Main_Timer_Init()
     Mutex_Init();
     Array_Init();
     return ret;
-// #endif // __WIN32__
+#endif // __WIN32__
 }
 
 DWORD WINAPI Main_Timer_Start(void)
