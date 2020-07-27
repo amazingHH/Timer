@@ -4,7 +4,7 @@
 
 void test(void)
 {
-    printf("10s timeout \n");
+    printf("4s timeout \n");
 }
 
 void test1(void)
@@ -16,7 +16,7 @@ void main(void)
     bool ret = true;
     G_Timer timer;
     G_Timer timer_S;
-    timer.m_Timer_Long = 10;
+    timer.m_Timer_Long = 4;
     timer.m_Timer_Name = "32";
     timer.m_func = &test;
     timer_S.m_Timer_Long = 3;

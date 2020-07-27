@@ -13,11 +13,9 @@
  * GNU General Public License for more details.
  *
 ***************************************************************/
-
 #include "Timer.h"
 
 
-static int g_Timer_Cnt = 0;
 static int g_Timer_Index = 0;
 #ifdef __WIN32__
 HANDLE Timer_Mutex;
@@ -137,7 +135,7 @@ Timer_Rregister_Status Timer_Register(G_Timer *T)
         if (Mutex_lock() == false)
         {
             printf("Mutex Lock failure, fatal error \n");
-            return;
+            return ret;
         }
         Timer_CFG_Table[g_Timer_Index].m_Timer_Name = T->m_Timer_Name;
         Timer_CFG_Table[g_Timer_Index].m_Timer_Long = T->m_Timer_Long;
@@ -146,8 +144,9 @@ Timer_Rregister_Status Timer_Register(G_Timer *T)
         ret =Register_Successfully;
         if (Mutex_unlock() == false)
         {
+            ret = Register_fail;
             printf("Mutex Unlock failure, fatal error \n");
-            return;
+            return ret;
         }
     }
     return ret;
@@ -169,15 +168,16 @@ bool Timer_Start(G_Timer T)
             if (Mutex_lock() == false)
             {
                 printf("Mutex Lock failure, fatal error \n");
-                return;
+                return ret;
             }
             Timer_CFG_Table[i].m_Timer_Start_Flag = true;
             Timer_CFG_Table[i].m_Timer_State = Timer_Active;
             ret = true;
             if (Mutex_unlock() == false)
             {
+                ret = false;
                 printf("Mutex Unlock failure, fatal error \n");
-                return;
+                return ret;
             }
         }
     }
@@ -221,6 +221,7 @@ bool Main_Timer_Init()
         printf("[TIMER]thread create failure \n");
         return false;
     }
+    Mutex_Init();
     Array_Init();
 #endif // __linux__
 #ifdef __WIN32__
@@ -238,8 +239,9 @@ bool Main_Timer_Init()
     }
     Mutex_Init();
     Array_Init();
-    return ret;
 #endif // __WIN32__
+    return ret;
+
 }
 
 /***************************************************************
@@ -248,9 +250,10 @@ Function Description:    Main loop for the timer
 Author:                  Francois Alex Hao
 Date:                    2020/7/24
 ***************************************************************/
-DWORD WINAPI Main_Timer_Start(void)
+#ifdef __linux__
+static void * Main_Timer_Start(void)
 {
-    while(1)
+        while(1)
     {
         uint_8 i = 0;
         usleep(500000);
@@ -282,3 +285,41 @@ DWORD WINAPI Main_Timer_Start(void)
         }
     }
 }
+#endif
+
+#if (defined __WIN32__ || defined __WIN64__)
+DWORD WINAPI Main_Timer_Start(void)
+{
+    while(1)
+    {
+        uint_8 i = 0;
+        usleep(500000);
+        for (i = 0; i < g_Timer_Index; i++)
+        {
+            if (Timer_CFG_Table[i].m_Timer_Start_Flag == true)
+            {
+                if (Mutex_lock() == false)
+                {
+                    printf("Mutex Lock failure, fatal error \n");
+                    return 0;
+                }
+                Timer_CFG_Table[i].m_Timer ++;
+                Timer_CFG_Table[i].m_Timer_State = Timer_Active;
+                if ((Timer_CFG_Table[i].m_Timer/TIME_TRANSFER_CONSTANT) >= Timer_CFG_Table[i].m_Timer_Long)
+                {
+                    Timer_CFG_Table[i].m_Timer = 0;
+                    Timer_CFG_Table[i].m_Timer_Start_Flag = false;
+                    Timer_CFG_Table[i].m_Timer_State = Timer_Lapsed;
+                    Timer_CFG_Table[i].func();
+                    // Timer_CFG_Table[i].func();
+                }
+                if (Mutex_unlock() == false)
+                {
+                    printf("Mutex Unlock failure, fatal error \n");
+                    return 0;
+                }
+            }
+        }
+    }
+}
+#endif
