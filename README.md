@@ -11,11 +11,14 @@ A generic timer for seconds level (currently only for Windows, It will support t
 How to use this timer?
 
 1. The sequence of the function using:
-	> Main_Timer_Init(): Initial the Timer queue and create the thread and mutex, it can be invoked at the beginning of the system start.
-	> Timer_Register(G_Timer *T): If you want to use a timer, you need register it first, so this function provide the register service. 
+	* Main_Timer_Init(): Initial the Timer queue and create the thread and mutex, it can be invoked at the beginning of the system start.
+	
+	* Timer_Register(G_Timer *T): If you want to use a timer, you need register it first, so this function provide the register service. 
 	    How to feed the timer, you can check the demo test code.
-	> Timer_Start(G_Timer T): This function will start the timer you want.
-	> Timer_Checker(G_Timer T): if you want to know the running status of the timer, you can use this function.
+	
+	* Timer_Start(G_Timer T): This function will start the timer you want.
+	
+	* Timer_Checker(G_Timer T): if you want to know the running status of the timer, you can use this function.
 
 2. The Callback for every timer.
 	This design provide a callback function for every timer, if the timer elapsed, the callback function will be triggerred.
